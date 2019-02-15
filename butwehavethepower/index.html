@@ -11,10 +11,87 @@
 <h1 id="title">Union Strike Folk Song</h1>
 
 <video src="https://www.cs.tufts.edu/comp/20/butwehavethepower.mp4" id="butwehavethepower" controls></video>
-<div id="lyrics"></div>
+
+<div id="lyrics">
+
+</div>
 
 <script>
 	// Complete this section and create a CSS file named style.css
+
+	var lyrics = {
+		v1 : "Come gather round, children, It's high time ye learned 'Bout a hero named Homer And a devil named Burns.",
+		v2 : "We'll march 'till we drop The girls and the fellas. We'll fight 'till the death Or else fold like umbrellas",
+		v3 : "So we'll march day and night By the big cooling tower. They have the plant",
+		v4 : "But we have the power.",
+		v5 : "Lenny: Now do \"Classical Gas!\"",
+		v6 : "So we'll march day and night By the big cooling tower. They have the plant",
+		v7 : "But we have the power."
+	}
+	var v = document.getElementsByTagName("video")[0];
+	v.addEventListener("timeupdate", function(){
+		if(this.currentTime >= 1 && this.currentTime <= 4) {
+        	document.getElementById("lyrics").innerHTML = "[Guitar music]"; 
+
+    	}
+    	if(this.currentTime >= 6 && this.currentTime <= 16) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v1"]; 
+
+    	}
+    	if(this.currentTime >= 17 && this.currentTime <= 27) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v2"]; 
+
+    	}
+    	if(this.currentTime >= 27 && this.currentTime <= 36) {
+        	document.getElementById("lyrics").innerHTML = ""; 
+
+    	}
+    	if(this.currentTime >= 38 && this.currentTime <= 44) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v3"]; 
+
+    	}
+    	if(this.currentTime >= 45 && this.currentTime <= 51) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v4"]; 
+
+    	}
+    	if(this.currentTime >= 51 && this.currentTime <= 52) {
+        	document.getElementById("lyrics").innerHTML = ""; 
+
+    	}
+    	if(this.currentTime >= 52.5 && this.currentTime <= 55) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v5"]; 
+
+    	}
+    	if(this.currentTime >= 55 && this.currentTime <= 67) {
+        	document.getElementById("lyrics").innerHTML = "[Guitar music]"; 
+
+    	}
+    	if(this.currentTime >= 67 && this.currentTime <= 72) {
+        	document.getElementById("lyrics").innerHTML = ""; 
+
+    	}
+    	if(this.currentTime >= 72 && this.currentTime <= 79) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v6"]; 
+
+    	}
+    	if(this.currentTime >= 79.5 && this.currentTime <= 82) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v7"]; 
+
+    	}
+    	if(this.currentTime >= 82 && this.currentTime <= 89) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v3"]; 
+
+    	}
+    	if(this.currentTime >= 89 && this.currentTime <= 92) {
+        	document.getElementById("lyrics").innerHTML = lyrics["v7"]; 
+
+    	}
+    	if(this.currentTime >= 92) {
+        	document.getElementById("lyrics").innerHTML = ""; 
+
+    	}
+	});
+	
 </script>
 </body>
 </html>

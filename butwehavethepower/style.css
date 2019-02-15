@@ -1,0 +1,14 @@
+body {
+	background-color: powderblue;
+	font-family: sans-serif;
+}
+h1 {
+	color: blue;
+}
+div{
+    padding-top: 20px;
+    padding-left: 10px;
+    font-size: 20px;
+    font-family: "HelveticaNeue-CondensedBold";
+
+}
