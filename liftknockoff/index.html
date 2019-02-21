@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<title>liftknockoff</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDWpj6nEOTRkXP_8utxRiYoVttqlenBa5E"></script>
+		<link rel="stylesheet" href="geolocation_map_style.css" />
+
+		<script>
+			var myUsername = "YcpHRqGU";
+			var myLat = 0;
+			var myLng = 0;
+			var me = new google.maps.LatLng(myLat, myLng);
+			var myOptions = {
+				zoom: 15, // The larger the zoom number, the bigger the zoom
+				center: me,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			var map;
+			var marker;
+			var JSONObject; 
+			var infowindow = new google.maps.InfoWindow();
+
+	        var icons = {
+	          vehicles: {
+	            icon: 'car.png'
+	          },
+	          passengers: {
+	            icon: 'passenger.png'
+	          },
+	        };
+
+			function getJSON() {
+				var http = new XMLHttpRequest();
+				var url = 'https://hans-moleman.herokuapp.com/rides';
+				var params = 'username='+myUsername+'&lat='+myLat+'&lng='+myLng;
+				http.open('POST', url, true);
+
+				//Send the proper header information along with the request
+				http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+				http.send(params);
+				http.onload = function() {
+					JSONObject = JSON.parse(http.responseText);
+					console.log("GOT JSON!: ", JSONObject);
+        		}
+			
+			}
+
+			function init() {
+				
+				map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+				getMyLocation();
+				getJSON();
+			}
+
+			function getMyLocation() {
+				if (navigator.geolocation) { // the navigator.geolocation object is supported on your browser
+					navigator.geolocation.getCurrentPosition(function(position) {
+						myLat = position.coords.latitude;
+						myLng = position.coords.longitude;
+						renderMap();
+					});
+				}
+				else {
+					console.log("Geolocation is not supported by your web browser.  What a shame!");
+				}
+			}
+
+			function setMarker(x, y, type, username){
+				var myLat = x;
+				var myLng = y;
+				var location = new google.maps.LatLng(myLat, myLng);
+				var marker;
+
+				marker = getMarker(type, location, username);
+				map.panTo(location);
+			
+				marker.setMap(map);
+					
+				// Open info window on click of marker
+				google.maps.event.addListener(marker, 'click', function() {
+					infowindow.setContent(marker.title);
+					infowindow.open(map, marker);
+				});
+
+			}
+
+			function getMarker(type, location, username){
+				var marker
+				if(type == 'passengers'){
+					marker = new google.maps.Marker({
+						position: location,
+						title: username,
+						icon: icons['passengers'].icon,
+					});
+				}else if(type == 'vehicles'){
+					marker = new google.maps.Marker({
+						position: location,
+						title: username,
+						icon: icons['vehicles'].icon,
+					});
+				}
+				return marker;
+			
+			}
+
+			function renderMap() {
+				
+				
+				//set my marker 
+							
+				setMarker(myLat, myLng, 'passengers', myUsername);
+
+				//set vehicle markers
+				for(var type in JSONObject){
+					var infoObj = JSONObject[type];
+					for(var info in infoObj){
+						var obj = infoObj[info];
+						setMarker(obj['lat'], obj['lng'], type, obj['username']);
+					}
+				}
+				
+
+			}
+		</script>
+	</head>
+	
+	<body onload="init()">
+		<div id="map_canvas"></div>
+	</body>
+</html>
