@@ -5,32 +5,40 @@
 	<head>
 		<title>liftknockoff</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDWpj6nEOTRkXP_8utxRiYoVttqlenBa5E"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key=AIzaSyDWpj6nEOTRkXP_8utxRiYoVttqlenBa5E"> 
+		</script>
 		<link rel="stylesheet" href="geolocation_map_style.css" />
 
 		<script>
 			var myUsername = "YcpHRqGU";
+			var seeking = "";
 			var myLat = 0;
 			var myLng = 0;
-			var me = new google.maps.LatLng(myLat, myLng);
+			var myLocation = new google.maps.LatLng(myLat, myLng);
 			var myOptions = {
-				zoom: 15, // The larger the zoom number, the bigger the zoom
-				center: me,
+				zoom: 7, // The larger the zoom number, the bigger the zoom
+				center: myLocation,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 			var map;
 			var marker;
 			var JSONObject; 
+			var JSONByUsername = {};
 			var infowindow = new google.maps.InfoWindow();
+			var weinermobile_exists = false;
 
-	        var icons = {
-	          vehicles: {
-	            icon: 'car.png'
-	          },
-	          passengers: {
-	            icon: 'passenger.png'
-	          },
-	        };
+			var icons = {
+			  vehicles: {
+			    icon: 'car.png'
+			  },
+			  passengers: {
+			    icon: 'passenger.png'
+			  },
+			  weinermobile: {
+			  	icon: 'weinermobile.png'
+			  }
+
+			};
 
 			function getJSON() {
 				var http = new XMLHttpRequest();
@@ -43,7 +51,6 @@
 				http.send(params);
 				http.onload = function() {
 					JSONObject = JSON.parse(http.responseText);
-					console.log("GOT JSON!: ", JSONObject);
         		}
 			
 			}
@@ -68,20 +75,71 @@
 				}
 			}
 
+			function getDistance(loc1, loc2){
+				return google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2);	
+			}
+
+			function getNearest(){
+				var closest;
+				for(var key in JSONByUsername) {
+				    if(JSONByUsername.hasOwnProperty(key)) {
+				        var firstObj = JSONByUsername[key];
+				        var location = new google.maps.LatLng(firstObj["lat"], firstObj["lng"]);
+				        closest = getDistance(location, myLocation);
+				        break;
+				    }
+				}
+				for(var key in JSONByUsername) {
+				    if(JSONByUsername.hasOwnProperty(key)) {
+				        var obj = JSONByUsername[key];
+				        var location = new google.maps.LatLng(obj["lat"], obj["lng"]);
+				        var distance = getDistance(location, myLocation);
+				        if(location < closest)
+				        	closest = location;
+				    }
+				}
+				return closest;
+			}
+
 			function setMarker(x, y, type, username){
-				var myLat = x;
-				var myLng = y;
-				var location = new google.maps.LatLng(myLat, myLng);
+				var lat = x;
+				var lng = y;
+				var location = new google.maps.LatLng(lat, lng);
 				var marker;
 
 				marker = getMarker(type, location, username);
 				map.panTo(location);
 			
 				marker.setMap(map);
-					
+
+				var username = marker.title;
+				var distance = getDistance(location, myLocation);
+				var nearest = 0;
+				var d_from_weinermobile;
+
 				// Open info window on click of marker
 				google.maps.event.addListener(marker, 'click', function() {
-					infowindow.setContent(marker.title);
+					if(marker.title == myUsername){
+						nearest = getNearest();
+						if(weinermobile_exists){
+							var WEINERMOBILE = JSONByUsername["WEINERMOBILE"];
+							var weinerLocation = new google.maps.LatLng(WEINERMOBILE["lat"], WEINERMOBILE["lng"]);
+							d_from_weinermobile = getDistance(location, weinerLocation);
+						}
+						
+						infowindow.setContent(
+							"<p>" + username + "</p>" + 
+    						"<p> Nearest " + seeking + ": " + nearest + "<p>" +
+    						"<p> Weinermobile exists: " + weinermobile_exists + "</p>" +
+    						"<p> Distance from Weinermobile: " + d_from_weinermobile + "<p>"
+    					);
+					}else{
+						infowindow.setContent(
+							"<p>" + username + "</p>" + 
+    						"<p> Distance: " + distance + "</p>"
+    					);
+					}
+					
 					infowindow.open(map, marker);
 				});
 
@@ -101,6 +159,12 @@
 						title: username,
 						icon: icons['vehicles'].icon,
 					});
+				}else if(type == 'weinermobile'){
+					marker = new google.maps.Marker({
+						position: location,
+						title: username,
+						icon: icons['weinermobile'].icon,
+					});
 				}
 				return marker;
 			
@@ -108,19 +172,25 @@
 
 			function renderMap() {
 				
-				
-				//set my marker 
-							
+				//set my marker 		
 				setMarker(myLat, myLng, 'passengers', myUsername);
 
 				//set vehicle markers
 				for(var type in JSONObject){
 					var infoObj = JSONObject[type];
+					(type == "vehicles") ? seeking = "vehicle" : "passenger";
 					for(var info in infoObj){
 						var obj = infoObj[info];
-						setMarker(obj['lat'], obj['lng'], type, obj['username']);
+						if(obj['username'] == "WEINERMOBILE"){
+							weinermobile_exists = true;
+							setMarker(obj['lat'], obj['lng'], "weinermobile", obj['username']);
+						}else{
+							setMarker(obj['lat'], obj['lng'], type, obj['username']);
+						}
+						JSONByUsername[obj['username']] = obj;
 					}
 				}
+				//
 				
 
 			}
