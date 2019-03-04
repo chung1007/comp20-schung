@@ -76,7 +76,9 @@
 			}
 
 			function getDistance(loc1, loc2){
-				return google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2);	
+				console.log("meters: ", google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2));
+				console.log("miles: ", google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2) * 0.000621371);
+				return google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2) * 0.000621371;	
 			}
 
 			function getNearest(){
@@ -98,7 +100,7 @@
 				        	closest = location;
 				    }
 				}
-				return closest;
+				return closest * 0.000621371;
 			}
 
 			function setMarker(x, y, type, username){
