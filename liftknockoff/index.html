@@ -40,6 +40,8 @@
 
 			};
 
+			
+
 			function getJSON() {
 				var http = new XMLHttpRequest();
 				var url = 'https://hans-moleman.herokuapp.com/rides';
@@ -75,10 +77,10 @@
 				}
 			}
 
-			function getDistance(loc1, loc2){
-				console.log("meters: ", google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2));
-				console.log("miles: ", google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2) * 0.000621371);
-				return google.maps.geometry.spherical.computeDistanceBetween(loc1, loc2) * 0.000621371;	
+			function getDistanceInMiles( point_a, point_b ) {
+				var distance_in_meters = google.maps.geometry.spherical.computeDistanceBetween( point_a, point_b );
+
+				return distance_in_meters * 0.000621371; // convert meters to miles
 			}
 
 			function getNearest(){
@@ -87,35 +89,36 @@
 				    if(JSONByUsername.hasOwnProperty(key)) {
 				        var firstObj = JSONByUsername[key];
 				        var location = new google.maps.LatLng(firstObj["lat"], firstObj["lng"]);
-				        closest = getDistance(location, myLocation);
+				        var myLocation = new google.maps.LatLng( myLat, myLng );
+				        closest = getDistanceInMiles(location, myLocation);
+				        console.log("closest temp:", closest);
 				        break;
 				    }
 				}
+
 				for(var key in JSONByUsername) {
 				    if(JSONByUsername.hasOwnProperty(key)) {
 				        var obj = JSONByUsername[key];
 				        var location = new google.maps.LatLng(obj["lat"], obj["lng"]);
-				        var distance = getDistance(location, myLocation);
-				        if(location < closest)
-				        	closest = location;
+				        var distance = getDistanceInMiles(location, myLocation);
+				        if(distance < closest)
+				        	closest = distance;
 				    }
 				}
-				return closest * 0.000621371;
+				return closest;
 			}
 
 			function setMarker(x, y, type, username){
-				var lat = x;
-				var lng = y;
-				var location = new google.maps.LatLng(lat, lng);
+				var location = new google.maps.LatLng(x, y);
 				var marker;
+				var myLocation = new google.maps.LatLng( myLat, myLng );
 
 				marker = getMarker(type, location, username);
 				map.panTo(location);
-			
 				marker.setMap(map);
 
 				var username = marker.title;
-				var distance = getDistance(location, myLocation);
+				var distance = getDistanceInMiles(location, myLocation);
 				var nearest = 0;
 				var d_from_weinermobile;
 
@@ -126,19 +129,19 @@
 						if(weinermobile_exists){
 							var WEINERMOBILE = JSONByUsername["WEINERMOBILE"];
 							var weinerLocation = new google.maps.LatLng(WEINERMOBILE["lat"], WEINERMOBILE["lng"]);
-							d_from_weinermobile = getDistance(location, weinerLocation);
+							d_from_weinermobile = getDistanceInMiles(weinerLocation, myLocation);
 						}
 						
 						infowindow.setContent(
 							"<p>" + username + "</p>" + 
-    						"<p> Nearest " + seeking + ": " + nearest + "<p>" +
+    						"<p> Nearest " + seeking + ": " + nearest + " miles<p>" +
     						"<p> Weinermobile exists: " + weinermobile_exists + "</p>" +
-    						"<p> Distance from Weinermobile: " + d_from_weinermobile + "<p>"
+    						"<p> Distance from Weinermobile: " + d_from_weinermobile + " miles<p>"
     					);
 					}else{
 						infowindow.setContent(
 							"<p>" + username + "</p>" + 
-    						"<p> Distance: " + distance + "</p>"
+    						"<p> Distance: " + distance + " miles</p>"
     					);
 					}
 					
@@ -171,30 +174,34 @@
 				return marker;
 			
 			}
-
 			function renderMap() {
+				var category; 		
 				
-				//set my marker 		
-				setMarker(myLat, myLng, 'passengers', myUsername);
-
 				//set vehicle markers
+				console.log("JSON", JSONObject);
 				for(var type in JSONObject){
 					var infoObj = JSONObject[type];
-					(type == "vehicles") ? seeking = "vehicle" : "passenger";
+					if(type == "vehicles"){
+						seeking = "vehicle";
+						category = "passengers";
+					}else{
+						seeking = "passenger";
+						category = "vehicles";
+					}
 					for(var info in infoObj){
 						var obj = infoObj[info];
+						JSONByUsername[obj['username']] = obj;
 						if(obj['username'] == "WEINERMOBILE"){
 							weinermobile_exists = true;
 							setMarker(obj['lat'], obj['lng'], "weinermobile", obj['username']);
 						}else{
 							setMarker(obj['lat'], obj['lng'], type, obj['username']);
 						}
-						JSONByUsername[obj['username']] = obj;
+						
 					}
 				}
-				//
-				
-
+				//set my marker
+				setMarker(myLat, myLng, category, myUsername);
 			}
 		</script>
 	</head>
