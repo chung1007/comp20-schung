@@ -2,7 +2,8 @@
 Assignment 2 for Comp 20, created by Sam Chung.
 
 ## Acknowledgements
-I did not work with and seek help from anyone. 
+View working examples from link given in the assignment. My CSS is based one of the examples shown here:
+https://github.com/tuftsdev/WebProgramming/blob/gh-pages/examples/
 
 ## Project Implementation
 Given the starter index.html file, the corresponding cascading style sheet named geolocation_map_style.css  was created.
