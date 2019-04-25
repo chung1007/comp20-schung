@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+	<body>
+	  <h1>Assignment 4: Security and Privacy Assessment of Private Car Service</h1>
+
+	  <h2>Introduction</h2>
+	  	<p>The product I will be analyzing is Ming Chow’s version of Assignment 3, server.js. I will be trying to scrutinize any security concerns within the code, including syntax, methods, coding practice etc.</p>
+	  <h2>Methodology</h2>
+	  	<p>I used the OWASP Zed Attack Proxy to find vulnerabilities in server.js. </p>
+	  <h2>Abstract of Findings</h2>
+	  	<p>Although there were very few vulnerabilities on the code methodology side of server.js, OWASP helped expose advanced security vulnerabilities that could be manipulated from the client side (hackers), using the vulnerabilities to their advantage. 	Because server.js handles and takes in user input, any weakness in that field could cause malicious content to get through.</p>
+	  <h2>Issues Found</h2>
+	  	<p>Issue #1: X-Frame-Options Header Not Set</p>
+	  		<ul> 
+  				<li>location</li>
+  					<p>In the HTTP Response for GET: http://localhost:3000/</p>  
+  				<li>severity</li>
+  					<p>Medium</p>
+  				<li>Description</li>
+  					<p>X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.</p>
+  					<img alt="issue_1" src="first_issue.png" width="900" height="250">
+  				<li>Proof Vulnerability</li>
+  					<p></p>
+  					<img alt="issue_1" src="clickjacking-code.png" width="900" height="350">
+  					<p></p>
+  					<img alt="issue_1" src="clickjacking.png" width="900" height="450">
+  				<li>Resolution</li>
+  					<p>Ensure it's set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. ALLOW-FROM allows specific websites to frame the web page in supported web browsers) (OWASP).</p>
+
+			</ul>
+		<p>Issue #2: Web Browser XSS Protection Not Enabled</p>
+			<ul> 
+  				<li>location</li>
+  					<p>In the HTTP Response for GET: http://localhost:3000/, http://localhost:3000/robots.txt, and http://localhost:3000/sitemap.xml</p>  
+  				<li>severity</li>
+  					<p>Low</p>
+  				<li>Description</li>
+  					<p>Web Browser XSS Protection is not enabled, or is disabled by the configuration of the 'X-XSS-Protection' HTTP response header on the web server</p>
+  					<img alt="issue_2" src="XSS.png" width="900" height="250">
+  				<li>Proof Vulnerability</li>
+  					<p>[Malicious script passed via POST request in the username field]</p>
+  					<img alt="issue_2" src="XSS-terminal.png" width="900" height="350">
+  					<p></p>
+  					<img alt="issue_2" src="XSS-code-example.png" width="800" height="400">
+  				<li>Resolution</li>
+  					<p>Ensure that the web browser's XSS filter is enabled, by setting the X-XSS-Protection HTTP response header to '1'(OWASP).</p>
+
+			</ul>
+		<p>Issue #3: X-Content-Type-Options Header Missing</p>
+			<ul> 
+  				<li>location</li>
+  					<p>In the HTTP Response for GET: http://localhost:3000/</p>  
+  				<li>severity</li>
+  					<p>Low</p>
+  				<li>Description</li>
+  					<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>
+  					<img alt="issue_3" src="third_issue.png" width="900" height="250">
+  				<li>Proof Vulnerability</li>
+  					<p>It was very difficult to try an attack this specific vulnerability because I was not familiar with the concept.</p>
+  				<li>Resolution</li>
+  					<p> Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.(OWASP).</p>
+
+			</ul>
+		<h2>Conclusion</h2>
+			<p>The server.js, although displayed good coding practice, still showed various complex vulnerabilities after getting tested by the OWASP  Zed Attack Proxy software. Because the server side has POST api which takes in various forms of user input, a weak security protocol to filter and validate user input can lead to malicious attacks getting through. One of the main major security flaws in server.js was Cross Site Scripting and Clickjacking, which would be possible through bad POST user input security filter.</p>
+		<h2>References</h2>
+			<ul>
+				<li>https://www.owasp.org/index.php/Testing_for_Clickjacking_(OTG-CLIENT-009)</li>
+				<li>https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)</li>
+				<li>Ming Chow’s server.js</li>
+			</ul>
+	</body>
+
+
+
+</html>
